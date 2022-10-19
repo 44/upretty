@@ -17,12 +17,16 @@ func main() {
 	entering := regexp.MustCompile(`../../.... .:..:.. .M Entering[^:]*: (?P<Name>.*):`)
 	failure := regexp.MustCompile(`../../.... .:..:.. .M Fail[^:]*: (?P<Name>.*)`)
 	pass := regexp.MustCompile(`../../.... .:..:.. .M Pass[^:]*: (?P<Name>.*)`)
+	help := regexp.MustCompile(`To re-run:`)
+	capturingHelp := false
+	helpText := ""
 
 	for scanner.Scan() {
 		txt := scanner.Text()
 		enteringMatches := entering.FindStringSubmatch(txt)
 		passingMatches := pass.FindStringSubmatch(txt)
 		failureMatches := failure.FindStringSubmatch(txt)
+		rerunMatches := help.FindStringSubmatch(txt)
 		if enteringMatches != nil {
 			index := entering.SubexpIndex("Name")
 			currentTest = enteringMatches[index]
@@ -39,8 +43,14 @@ func main() {
 			fmt.Println(" \033[32mOK\033[0m", time.Since(currentTestStart))
 			currentTest = ""
 			currentTestOutput = ""
+		} else if rerunMatches != nil {
+			capturingHelp = true
 		} else {
-			currentTestOutput = currentTestOutput + "\n" + txt
+			if capturingHelp {
+				helpText = helpText + "\n" + txt
+			} else {
+				currentTestOutput = currentTestOutput + "\n" + txt
+			}
 		}
 
 	}
@@ -54,6 +64,11 @@ func main() {
 		fmt.Println("\n\nUnfinished tests:")
 		fmt.Println(currentTest)
 		fmt.Println(currentTestOutput)
+	}
+
+	if helpText != "" {
+		fmt.Println("\n\nTo re-run:")
+		fmt.Println(helpText)
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
