@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	_ "strings"
 	"regexp"
 	"time"
 )
@@ -34,21 +33,27 @@ func main() {
 			failedTests = append(failedTests, currentTest)
 			fmt.Print(currentTestOutput)
 			fmt.Println("\n", currentTest, " \033[31mFail\033[0m", time.Since(currentTestStart))
+			currentTestOutput = ""
+			currentTest = ""
 		} else if passingMatches != nil {
 			fmt.Println(" \033[32mOK\033[0m", time.Since(currentTestStart))
+			currentTest = ""
+			currentTestOutput = ""
 		} else {
 			currentTestOutput = currentTestOutput + "\n" + txt
 		}
 
-
-		// ucl := strings.ToUpper(scanner.Text())
-		// fmt.Println(ucl)
 	}
 	if len(failedTests) > 0 {
 		fmt.Println("\n\nFailed tests:")
 		for i := range failedTests {
 			fmt.Println(failedTests[i])
 		}
+	}
+	if currentTest != "" {
+		fmt.Println("\n\nUnfinished tests:")
+		fmt.Println(currentTest)
+		fmt.Println(currentTestOutput)
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
