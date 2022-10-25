@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	passed := 0
 	failedTests := []string{}
 	scanner := bufio.NewScanner(os.Stdin)
 	currentTest := ""
@@ -43,6 +44,7 @@ func main() {
 			fmt.Println(" \033[32mOK\033[0m", time.Since(currentTestStart))
 			currentTest = ""
 			currentTestOutput = ""
+			passed += 1
 		} else if rerunMatches != nil {
 			capturingHelp = true
 		} else {
@@ -65,9 +67,10 @@ func main() {
 		fmt.Println(currentTest)
 		fmt.Println(currentTestOutput)
 	}
+	fmt.Printf("\nTOTAL: %d passed / %d failed\n", passed, len(failedTests))
 
 	if helpText != "" {
-		fmt.Println("\n\nTo re-run:")
+		fmt.Println("\nTo re-run:")
 		fmt.Println(helpText)
 	}
 	if err := scanner.Err(); err != nil {
