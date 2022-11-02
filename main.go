@@ -15,9 +15,9 @@ func main() {
 	currentTest := ""
 	currentTestOutput := ""
 	currentTestStart := time.Now()
-	entering := regexp.MustCompile(`../../.... .?.:..:.. .M Entering[^:]*: (?P<Name>.*):`)
-	failure := regexp.MustCompile(`../../.... .?.:..:.. .M Fail[^:]*: (?P<Name>.*)`)
-	pass := regexp.MustCompile(`../../.... .?.:..:.. .M Pass[^:]*: (?P<Name>.*)`)
+	entering := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Entering[^:]*: (?P<Name>.*):`)
+	failure := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Fail[^:]*: (?P<Name>.*)`)
+	pass := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Pass[^:]*: (?P<Name>.*)`)
 	help := regexp.MustCompile(`To re-run:`)
 	capturingHelp := false
 	helpText := ""
