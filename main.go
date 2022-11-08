@@ -24,17 +24,18 @@ func main() {
 	entering := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Entering[^:]*: (?P<Name>.*):`)
 	failure := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Fail[^:]*: (?P<Name>.*)`)
 	pass := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Pass[^:]*: (?P<Name>.*)`)
+	latchPrefix := regexp.MustCompile(`^..?/..?/.... .?.:..:.. .M [^:]*: `)
 	help := regexp.MustCompile(`To re-run:`)
 	capturingHelp := false
 	helpText := ""
 
-	failMessage := " \033[31mFail\033[0m"
+	failMessage := "\033[31mFail\033[0m"
 	if disableColors {
-		failMessage = " Fail"
+		failMessage = "Fail"
 	}
-	successMessage := " \033[32mOK\033[0m"
+	successMessage := "\033[32mOK\033[0m"
 	if disableColors {
-		successMessage = " OK"
+		successMessage = "OK"
 	}
 
 	for scanner.Scan() {
@@ -54,7 +55,7 @@ func main() {
 		} else if failureMatches != nil {
 			if showFailuresOnly {
 				fmt.Println()
-				fmt.Println(currentTest, failMessage, time.Since(currentTestStart))
+				fmt.Println(failMessage, currentTest, time.Since(currentTestStart))
 			}
 			failedTests = append(failedTests, currentTest)
 			fmt.Print(currentTestOutput)
@@ -76,7 +77,11 @@ func main() {
 			if capturingHelp {
 				helpText = helpText + "\n" + txt
 			} else {
-				currentTestOutput = currentTestOutput + "\n" + txt
+				if showFailuresOnly {
+					currentTestOutput = currentTestOutput + "\n" + latchPrefix.ReplaceAllString(txt, "")
+				} else {
+					currentTestOutput = currentTestOutput + "\n" + txt
+				}
 			}
 		}
 
