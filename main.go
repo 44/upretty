@@ -6,9 +6,15 @@ import (
 	"os"
 	"regexp"
 	"time"
+	"flag"
 )
 
 func main() {
+	disableColors := false
+	showFailuresOnly := false
+	flag.BoolVar(&disableColors, "no-color", false, "disable color output")
+	flag.BoolVar(&showFailuresOnly, "failures-only", false, "show only failures")
+	flag.Parse()
 	passed := 0
 	failedTests := []string{}
 	scanner := bufio.NewScanner(os.Stdin)
@@ -22,6 +28,15 @@ func main() {
 	capturingHelp := false
 	helpText := ""
 
+	failMessage := " \033[31mFail\033[0m"
+	if disableColors {
+		failMessage = " Fail"
+	}
+	successMessage := " \033[32mOK\033[0m"
+	if disableColors {
+		successMessage = " OK"
+	}
+
 	for scanner.Scan() {
 		txt := scanner.Text()
 		enteringMatches := entering.FindStringSubmatch(txt)
@@ -33,15 +48,24 @@ func main() {
 			currentTest = enteringMatches[index]
 			currentTestOutput = ""
 			currentTestStart = time.Now()
-			fmt.Print(currentTest)
+			if !showFailuresOnly {
+				fmt.Print(currentTest)
+			}
 		} else if failureMatches != nil {
+			if showFailuresOnly {
+				fmt.Println(currentTest, failMessage, time.Since(currentTestStart))
+			}
 			failedTests = append(failedTests, currentTest)
 			fmt.Print(currentTestOutput)
-			fmt.Println("\n", currentTest, " \033[31mFail\033[0m", time.Since(currentTestStart))
+			if !showFailuresOnly {
+				fmt.Println("\n", currentTest, failMessage, time.Since(currentTestStart))
+			}
 			currentTestOutput = ""
 			currentTest = ""
 		} else if passingMatches != nil {
-			fmt.Println(" \033[32mOK\033[0m", time.Since(currentTestStart))
+			if !showFailuresOnly {
+				fmt.Println(successMessage, time.Since(currentTestStart))
+			}
 			currentTest = ""
 			currentTestOutput = ""
 			passed += 1
@@ -57,9 +81,11 @@ func main() {
 
 	}
 	if len(failedTests) > 0 {
-		fmt.Println("\n\nFailed tests:")
-		for i := range failedTests {
-			fmt.Println(failedTests[i])
+		if !showFailuresOnly {
+			fmt.Println("\n\nFailed tests:")
+			for i := range failedTests {
+				fmt.Println(failedTests[i])
+			}
 		}
 	}
 	if currentTest != "" {
@@ -67,11 +93,13 @@ func main() {
 		fmt.Println(currentTest)
 		fmt.Println(currentTestOutput)
 	}
-	fmt.Printf("\nTOTAL: %d passed / %d failed\n", passed, len(failedTests))
+	if !showFailuresOnly {
+		fmt.Printf("\nTOTAL: %d passed / %d failed\n", passed, len(failedTests))
 
-	if helpText != "" {
-		fmt.Println("\nTo re-run:")
-		fmt.Println(helpText)
+		if helpText != "" {
+			fmt.Println("\nTo re-run:")
+			fmt.Println(helpText)
+		}
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
