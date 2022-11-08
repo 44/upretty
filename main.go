@@ -53,6 +53,7 @@ func main() {
 			}
 		} else if failureMatches != nil {
 			if showFailuresOnly {
+				fmt.Println()
 				fmt.Println(currentTest, failMessage, time.Since(currentTestStart))
 			}
 			failedTests = append(failedTests, currentTest)
