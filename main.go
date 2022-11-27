@@ -86,6 +86,7 @@ func main() {
 		}
 
 	}
+	exitCode := 0
 	if len(failedTests) > 0 {
 		if !showFailuresOnly {
 			fmt.Println("\n\nFailed tests:")
@@ -93,11 +94,13 @@ func main() {
 				fmt.Println(failedTests[i])
 			}
 		}
+		exitCode = 1
 	}
 	if currentTest != "" {
 		fmt.Println("\n\nUnfinished tests:")
 		fmt.Println(currentTest)
 		fmt.Println(currentTestOutput)
+		exitCode = 1
 	}
 	if !showFailuresOnly {
 		fmt.Printf("\nTOTAL: %d passed / %d failed\n", passed, len(failedTests))
@@ -111,4 +114,5 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+	os.Exit(exitCode)
 }
