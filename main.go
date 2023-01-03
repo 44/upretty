@@ -66,7 +66,7 @@ func main() {
 			currentTest = ""
 		} else if passingMatches != nil {
 			if !showFailuresOnly {
-				fmt.Println(successMessage, time.Since(currentTestStart))
+				fmt.Println("", successMessage, time.Since(currentTestStart))
 			}
 			currentTest = ""
 			currentTestOutput = ""
