@@ -19,7 +19,7 @@ func main() {
 	failedTests := []string{}
 	scanner := bufio.NewScanner(os.Stdin)
 	currentTest := ""
-	currentTestOutput := ""
+	currentTestOutput := []string{}
 	currentTestStart := time.Now()
 	entering := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Entering[^:]*: (?P<Name>.*):`)
 	failure := regexp.MustCompile(`..?/..?/.... .?.:..:.. .M Fail[^:]*: (?P<Name>.*)`)
@@ -47,7 +47,7 @@ func main() {
 		if enteringMatches != nil {
 			index := entering.SubexpIndex("Name")
 			currentTest = enteringMatches[index]
-			currentTestOutput = ""
+			currentTestOutput = []string{}
 			currentTestStart = time.Now()
 			if !showFailuresOnly {
 				fmt.Print(currentTest)
@@ -58,18 +58,25 @@ func main() {
 				fmt.Println(failMessage, currentTest, time.Since(currentTestStart))
 			}
 			failedTests = append(failedTests, currentTest)
-			fmt.Print(currentTestOutput)
-			if !showFailuresOnly {
-				fmt.Println("\n", currentTest, failMessage, time.Since(currentTestStart))
+			// fmt.Print(currentTestOutput)
+			if len(currentTestOutput) > 0 {
+				fmt.Println()
 			}
-			currentTestOutput = ""
+			for _, line := range(currentTestOutput) {
+				fmt.Println("    ", line)
+			}
+			if !showFailuresOnly {
+				fmt.Println()
+				fmt.Println(currentTest, failMessage, time.Since(currentTestStart))
+			}
+			currentTestOutput = []string{}
 			currentTest = ""
 		} else if passingMatches != nil {
 			if !showFailuresOnly {
 				fmt.Println("", successMessage, time.Since(currentTestStart))
 			}
 			currentTest = ""
-			currentTestOutput = ""
+			currentTestOutput = []string{}
 			passed += 1
 		} else if rerunMatches != nil {
 			capturingHelp = true
@@ -78,9 +85,10 @@ func main() {
 				helpText = helpText + "\n" + txt
 			} else {
 				if showFailuresOnly {
-					currentTestOutput = currentTestOutput + "\n" + latchPrefix.ReplaceAllString(txt, "")
+					// currentTestOutput = currentTestOutput + "\n" + latchPrefix.ReplaceAllString(txt, "")
+					currentTestOutput = append(currentTestOutput, latchPrefix.ReplaceAllString(txt, ""))
 				} else {
-					currentTestOutput = currentTestOutput + "\n" + txt
+					currentTestOutput = append(currentTestOutput, txt)
 				}
 			}
 		}
