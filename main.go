@@ -115,10 +115,18 @@ func main() {
 	}
 	if !showFailuresOnly {
 		fmt.Println()
+		passedStyle := successStyle
+		failedStyle := errorStyle
+		if passed == 0 {
+			passedStyle = dimStyle
+		}
+		if len(failedTests) == 0 {
+			failedStyle = dimStyle
+		}
 		fmt.Println("TOTAL: ",
-			successStyle.Render(fmt.Sprintf("%d passed", passed)),
+			passedStyle.Render(fmt.Sprintf("%d passed", passed)),
 			"/",
-			errorStyle.Render(fmt.Sprintf("%d failed", len(failedTests))))
+			failedStyle.Render(fmt.Sprintf("%d failed", len(failedTests))))
 
 		if helpText != "" {
 			fmt.Println("\nTo re-run:")
