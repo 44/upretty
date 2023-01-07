@@ -31,9 +31,11 @@ func main() {
 	helpText := ""
 	errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff3311"))
 	successStyle :=  lipgloss.NewStyle().Foreground(lipgloss.Color("#11aa33"))
+	dimStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#777"))
 	if disableColors {
 		errorStyle = lipgloss.NewStyle()
 		successStyle = lipgloss.NewStyle()
+		dimStyle = lipgloss.NewStyle()
 	}
 
 	failMessage := errorStyle.Render("Fail") //"\033[31mFail\033[0m"
@@ -56,7 +58,7 @@ func main() {
 		} else if failureMatches != nil {
 			if showFailuresOnly {
 				fmt.Println()
-				fmt.Println(failMessage, currentTest, time.Since(currentTestStart))
+				fmt.Println(failMessage, currentTest, dimStyle.Render(time.Since(currentTestStart).String()))
 			}
 			failedTests = append(failedTests, currentTest)
 			// fmt.Print(currentTestOutput)
@@ -68,13 +70,13 @@ func main() {
 			}
 			if !showFailuresOnly {
 				fmt.Println()
-				fmt.Println(currentTest, failMessage, time.Since(currentTestStart))
+				fmt.Println(currentTest, failMessage, dimStyle.Render(time.Since(currentTestStart).String()))
 			}
 			currentTestOutput = []string{}
 			currentTest = ""
 		} else if passingMatches != nil {
 			if !showFailuresOnly {
-				fmt.Println("", successMessage, time.Since(currentTestStart))
+				fmt.Println("", successMessage, dimStyle.Render(time.Since(currentTestStart).String()))
 			}
 			currentTest = ""
 			currentTestOutput = []string{}
