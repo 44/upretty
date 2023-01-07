@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 	"flag"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func main() {
@@ -28,15 +29,15 @@ func main() {
 	help := regexp.MustCompile(`To re-run:`)
 	capturingHelp := false
 	helpText := ""
+	errorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff3311"))
+	successStyle :=  lipgloss.NewStyle().Foreground(lipgloss.Color("#11aa33"))
+	if disableColors {
+		errorStyle = lipgloss.NewStyle()
+		successStyle = lipgloss.NewStyle()
+	}
 
-	failMessage := "\033[31mFail\033[0m"
-	if disableColors {
-		failMessage = "Fail"
-	}
-	successMessage := "\033[32mOK\033[0m"
-	if disableColors {
-		successMessage = "OK"
-	}
+	failMessage := errorStyle.Render("Fail") //"\033[31mFail\033[0m"
+	successMessage := successStyle.Render("OK") //"\033[32mOK\033[0m"
 
 	for scanner.Scan() {
 		txt := scanner.Text()
@@ -111,7 +112,11 @@ func main() {
 		exitCode = 1
 	}
 	if !showFailuresOnly {
-		fmt.Printf("\nTOTAL: %d passed / %d failed\n", passed, len(failedTests))
+		fmt.Println()
+		fmt.Println("TOTAL: ",
+			successStyle.Render(fmt.Sprintf("%d passed", passed)),
+			"/",
+			errorStyle.Render(fmt.Sprintf("%d failed", len(failedTests))))
 
 		if helpText != "" {
 			fmt.Println("\nTo re-run:")
