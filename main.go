@@ -7,10 +7,33 @@ import (
 	"regexp"
 	"time"
 	"flag"
-	"strings"
+	// "strings"
 	"github.com/charmbracelet/lipgloss"
 	// sanitize "github.com/mrz1836/go-sanitize"
 )
+
+func printProgress(passed int, failed int, currentTest string) {
+	failedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#ff3311"))
+	passedStyle :=  lipgloss.NewStyle().Foreground(lipgloss.Color("#11aa33"))
+	dimStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#777"))
+	if passed == 0 {
+		passedStyle = dimStyle
+	}
+	if failed == 0 {
+		failedStyle = dimStyle
+	}
+	clearLine()
+	fmt.Print(
+		passedStyle.Render(fmt.Sprintf("%d passed", passed)),
+		" / ",
+		failedStyle.Render(fmt.Sprintf("%d failed", failed)),
+		" : ", currentTest)
+
+}
+
+func clearLine() {
+	fmt.Print("\x1b[2K\x1b[0G")
+}
 
 func main() {
 	disableColors := false
@@ -55,7 +78,8 @@ func main() {
 			currentTestOutput = []string{}
 			currentTestStart = time.Now()
 			if !showFailuresOnly {
-				fmt.Print(currentTest, ':')
+				printProgress(passed, len(failedTests), currentTest)
+				// fmt.Print(currentTest, ':')
 			}
 		} else if failureMatches != nil {
 			if showFailuresOnly {
@@ -63,7 +87,7 @@ func main() {
 				fmt.Println(failMessage, currentTest, dimStyle.Render(time.Since(currentTestStart).String()))
 			}
 			failedTests = append(failedTests, currentTest)
-			fmt.Print("\x1b[2K")
+			clearLine()
 			if len(currentTestOutput) > 0 {
 				fmt.Println()
 			}
@@ -73,13 +97,15 @@ func main() {
 			if !showFailuresOnly {
 				fmt.Println()
 				fmt.Println(currentTest, failMessage, dimStyle.Render(time.Since(currentTestStart).String()))
+				printProgress(passed, len(failedTests), currentTest)
 			}
 			currentTestOutput = []string{}
 			currentTest = ""
 		} else if passingMatches != nil {
 			if !showFailuresOnly {
-				fmt.Print("\x1b[2K\x1b[0G")
+				clearLine()
 				fmt.Println(currentTest, successMessage, dimStyle.Render(time.Since(currentTestStart).String()))
+				printProgress(passed, len(failedTests), currentTest)
 			}
 			currentTest = ""
 			currentTestOutput = []string{}
@@ -94,16 +120,6 @@ func main() {
 					// currentTestOutput = currentTestOutput + "\n" + latchPrefix.ReplaceAllString(txt, "")
 					currentTestOutput = append(currentTestOutput, latchPrefix.ReplaceAllString(txt, ""))
 				} else {
-					// fmt.Print()
-					if currentTest != "" {
-						fmt.Print("\x1b[2K\x1b[0G")
-						s := strings.ReplaceAll(txt, "\n", " ")
-						s = strings.ReplaceAll(txt, "\r", " ")
-						s = strings.ReplaceAll(txt, "\t", " ")
-						s = strings.ReplaceAll(txt, "  ", " ")
-						s = strings.Trim(s, " \n\r\t")
-						fmt.Printf("%s: %80.80s", currentTest, s)
-					}
 					currentTestOutput = append(currentTestOutput, txt)
 				}
 			}
