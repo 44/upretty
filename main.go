@@ -7,7 +7,9 @@ import (
 	"regexp"
 	"time"
 	"flag"
+	"strings"
 	"github.com/charmbracelet/lipgloss"
+	// sanitize "github.com/mrz1836/go-sanitize"
 )
 
 func main() {
@@ -53,7 +55,7 @@ func main() {
 			currentTestOutput = []string{}
 			currentTestStart = time.Now()
 			if !showFailuresOnly {
-				fmt.Print(currentTest)
+				fmt.Print(currentTest, ':')
 			}
 		} else if failureMatches != nil {
 			if showFailuresOnly {
@@ -61,7 +63,7 @@ func main() {
 				fmt.Println(failMessage, currentTest, dimStyle.Render(time.Since(currentTestStart).String()))
 			}
 			failedTests = append(failedTests, currentTest)
-			// fmt.Print(currentTestOutput)
+			fmt.Print("\x1b[2K")
 			if len(currentTestOutput) > 0 {
 				fmt.Println()
 			}
@@ -76,7 +78,8 @@ func main() {
 			currentTest = ""
 		} else if passingMatches != nil {
 			if !showFailuresOnly {
-				fmt.Println("", successMessage, dimStyle.Render(time.Since(currentTestStart).String()))
+				fmt.Print("\x1b[2K\x1b[0G")
+				fmt.Println(currentTest, successMessage, dimStyle.Render(time.Since(currentTestStart).String()))
 			}
 			currentTest = ""
 			currentTestOutput = []string{}
@@ -91,6 +94,16 @@ func main() {
 					// currentTestOutput = currentTestOutput + "\n" + latchPrefix.ReplaceAllString(txt, "")
 					currentTestOutput = append(currentTestOutput, latchPrefix.ReplaceAllString(txt, ""))
 				} else {
+					// fmt.Print()
+					if currentTest != "" {
+						fmt.Print("\x1b[2K\x1b[0G")
+						s := strings.ReplaceAll(txt, "\n", " ")
+						s = strings.ReplaceAll(txt, "\r", " ")
+						s = strings.ReplaceAll(txt, "\t", " ")
+						s = strings.ReplaceAll(txt, "  ", " ")
+						s = strings.Trim(s, " \n\r\t")
+						fmt.Printf("%s: %80.80s", currentTest, s)
+					}
 					currentTestOutput = append(currentTestOutput, txt)
 				}
 			}

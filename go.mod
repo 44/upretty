@@ -2,7 +2,10 @@ module github.com/44/upretty
 
 go 1.19
 
-require github.com/charmbracelet/lipgloss v0.6.0
+require (
+	github.com/charmbracelet/lipgloss v0.6.0
+	github.com/mrz1836/go-sanitize v1.2.0
+)
 
 require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
